@@ -103,9 +103,10 @@ public class Main {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                jda.getGuildById("954271232067530782").getRoleById("955311110649675887").getManager().setColor(new Color(0, random(50, 150), random(50, 150))).queue();
+                cancel();
+                //jda.getGuildById("954271232067530782").getRoleById("955311110649675887").getManager().setColor(new Color(0, random(50, 150), random(50, 150))).queue();
             }
-        }, 0, 500L);
+        }, 0, 1000L);
     }
 
     private int random(int min, int max) {
