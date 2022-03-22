@@ -13,9 +13,9 @@ public class Settings {
 
     private static Config config;
 
-    @Nonnull
     public static String GUILD_ID = "954271232067530782"; // TODO: this is test server change to main server later!
     public static String TOKEN = "";
+    public static String SUPPORT_TEXT_CHANNEL = "955372374335827968";
 
     public static boolean loadFromConfig(){
         if (TokenManager.load()) return false;
@@ -28,9 +28,18 @@ public class Settings {
         Settings.config = config;
 
         if (config.getString("GUILD_ID") != null){
-            GUILD_ID = config.getString("GUILD_ID");
+            //GUILD_ID = config.getString("GUILD_ID");
         }
 
+        if (config.getString("SUPPORT_TEXT_CHANNEL") != null){
+
+        }
+
+        return true;
+    }
+
+    public static boolean saveToConfig(){
+        config.save();
         return true;
     }
 }
