@@ -2,10 +2,13 @@ package me.karam.slash.commands.impl;
 
 import me.karam.Main;
 import me.karam.slash.commands.SlashCommand;
+import me.karam.utils.BotLogger;
 import me.karam.utils.Severity;
+import me.karam.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 
@@ -14,9 +17,9 @@ import java.util.concurrent.TimeUnit;
 public class DMCommand implements SlashCommand {
 
     @Override
-    public void performCommand(SlashCommandEvent event, Member member, TextChannel channel) {
+    public void performCommand(SlashCommandInteractionEvent event, Member member, TextChannel channel) {
         String targetID = event.getOptions().get(0).getAsString();
-        Main.getInstance().log(Severity.INFO, targetID);
+        //BotLogger.log(Severity.INFO, targetID);
         String message = event.getOptions().get(1).getAsString();
 
         if (!member.hasPermission(Permission.MESSAGE_MANAGE)){
@@ -36,21 +39,8 @@ public class DMCommand implements SlashCommand {
             return;
         }
 
-        //event.reply("Successfully sent the message ")
-        sendPrivateMessage(targetMember.getUser(), message);
+        event.reply("Successfully sent the message");
+        Utils.sendPrivateMessage(targetMember.getUser(), message);
     }
 
-    private static void sendPrivateMessage(User user, String content) {
-        user.openPrivateChannel().queue((channel) ->
-        {
-            channel.sendMessage(content).queue();
-        });
-    }
-
-    private static void sendPrivateMessage(User user, MessageEmbed content) {
-        user.openPrivateChannel().queue((channel) ->
-        {
-            channel.sendMessageEmbeds(content).queue();
-        });
-    }
 }

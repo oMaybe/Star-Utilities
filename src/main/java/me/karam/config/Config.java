@@ -11,6 +11,7 @@ import java.util.HashMap;
 
 public class Config {
 
+    //private JSONObject tempArray = new JSONObject();
     public HashMap<String, Object> defaults = new HashMap<String, Object>();
     private File file;
     private JSONObject json; // org.json.simple
@@ -39,6 +40,10 @@ public class Config {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    public void insert(Object key, Object value){
+        json.put(key, value);
     }
 
     public String getRawData(String key) {
@@ -99,7 +104,7 @@ public class Config {
             }
 
             Gson g = new GsonBuilder().create();
-            String prettyJsonString = g.toJson(toSave);
+            String prettyJsonString = g.toJson(json);
 
             FileWriter fw = new FileWriter(file);
             fw.write(prettyJsonString);

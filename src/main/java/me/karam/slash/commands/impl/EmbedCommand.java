@@ -1,21 +1,31 @@
 package me.karam.slash.commands.impl;
 
 import me.karam.Main;
+import me.karam.modules.modmail.Ticket;
+import me.karam.modules.modmail.TicketType;
 import me.karam.slash.commands.SlashCommand;
 import me.karam.utils.Severity;
+import me.karam.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
-import net.dv8tion.jda.api.events.interaction.ButtonClickEvent;
-import net.dv8tion.jda.api.events.interaction.SlashCommandEvent;
-import net.dv8tion.jda.api.interactions.components.Button;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 
+import java.awt.*;
+import java.lang.reflect.AnnotatedType;
+import java.util.Date;
+import java.util.UUID;
+
 public class EmbedCommand implements SlashCommand {
-    @Override
-    public void performCommand(SlashCommandEvent event, Member m, TextChannel channel) {
+
+    public void performCommand(SlashCommandInteractionEvent event, Member m, TextChannel channel) {
         if (!event.getMember().hasPermission(Permission.ADMINISTRATOR)) return;
+
         if (event.getOptions().get(0).getAsString().equalsIgnoreCase("support")) {
             EmbedBuilder builder = new EmbedBuilder();
             builder.setTitle(MarkdownUtil.bold("⭐ Star Galaxy Support ⭐"));
@@ -58,11 +68,57 @@ public class EmbedCommand implements SlashCommand {
         }
     }
 
-    public static void onButton(ButtonClickEvent event){
+    public void onButton(ButtonInteractionEvent event){
         String buttonID = event.getComponentId();
         Member member = event.getMember();
-        if (buttonID.equals("apply")){
-            event.reply("Starting apply ticket..").setEphemeral(true).queue();
+        if (buttonID.equalsIgnoreCase("apply") || buttonID.equalsIgnoreCase("nitro") ||
+                buttonID.equalsIgnoreCase("report") || buttonID.equalsIgnoreCase("question") || buttonID.equalsIgnoreCase("Ban Appeal")) {
+            if (Main.getInstance().getTicketManager().hasOpenTicket(member.getUser().getId())) {
+                event.reply("You already have another ticket open!").setEphemeral(true).queue();
+                return;
+            }
+
+            EmbedBuilder media = new EmbedBuilder();
+            media.setDescription("Your ticket has been created. A staff member will be with you shortly.");
+            media.setTimestamp(new Date().toInstant());
+            media.setColor(new Color(0, 150, 0));
+
+            if (buttonID.equals("apply")) {
+                event.reply("Starting media application in dms..").setEphemeral(true).queue();
+
+                Utils.sendPrivateMessage(event.getUser(), media.build());
+
+                Ticket ticket = new Ticket(UUID.randomUUID(), member.getUser().getId(), member, TicketType.Media);
+                Main.getInstance().getTicketManager().add(ticket);
+            } else if (buttonID.equalsIgnoreCase("nitro")) {
+                event.reply("Starting nitro perks ticket in dms..").setEphemeral(true).queue();
+
+                Utils.sendPrivateMessage(event.getUser(), media.build());
+
+                Ticket ticket = new Ticket(UUID.randomUUID(), member.getUser().getId(), member, TicketType.Nitro_Perks);
+                Main.getInstance().getTicketManager().add(ticket);
+            } else if (buttonID.equalsIgnoreCase("report")) {
+                event.reply("Starting report user ticket in dms..").setEphemeral(true).queue();
+
+                Utils.sendPrivateMessage(event.getUser(), media.build());
+
+                Ticket ticket = new Ticket(UUID.randomUUID(), member.getUser().getId(), member, TicketType.Report_User);
+                Main.getInstance().getTicketManager().add(ticket);
+            } else if (buttonID.equalsIgnoreCase("question")) {
+                event.reply("Starting other questions tickets in dms..").setEphemeral(true).queue();
+
+                Utils.sendPrivateMessage(event.getUser(), media.build());
+
+                Ticket ticket = new Ticket(UUID.randomUUID(), member.getUser().getId(), member, TicketType.Other);
+                Main.getInstance().getTicketManager().add(ticket);
+            } else if (event.getButton().getLabel().equalsIgnoreCase("\uD83D\uDD28 Appeal Ban")) {
+                event.reply("Launched ban appeal form.").setEphemeral(true).queue();
+
+                //Utils.sendPrivateMessage(event.getUser(), media.build());
+
+                Ticket ticket = new Ticket(UUID.randomUUID(), member.getUser().getId(), member, TicketType.Ban_Appeal);
+                Main.getInstance().getTicketManager().add(ticket);
+            }
         }
     }
 }
