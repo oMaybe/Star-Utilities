@@ -67,42 +67,14 @@ public class TicketCommand implements SlashCommand {
             ticket.setResponder(event.getUser().getId());
             event.replyModal(modal).queue();
         }else if (buttonID.equalsIgnoreCase("close_no_reason")){
-            EmbedBuilder embedBuilder = new EmbedBuilder();
-
-            embedBuilder.setAuthor(ticket.getConsumer().getUser().getAsTag(), null, ticket.getConsumer().getAvatarUrl());
-            embedBuilder.setTitle("Ticket Closed.");
-            embedBuilder.setDescription("This ticket has been closed with no reason.");
-            embedBuilder.setFooter("Closed");
-            embedBuilder.setTimestamp(new Date().toInstant());
-            embedBuilder.setColor(new Color(0, 0, 0));
-
-            ticket.setResponder(event.getUser().getId());
-            if (ticket.getM() != null)
-                ticket.getM().addReaction("✅").queue();
-
-            EmbedBuilder consumerTicket = new EmbedBuilder();
-            consumerTicket.setAuthor("Support Team", null, event.getJDA().getSelfUser().getAvatarUrl());
-            consumerTicket.setColor(new Color(0, 0, 0));
-            consumerTicket.setDescription("This ticket has now been closed. If you send another message, it will create a new ticket.");
-            consumerTicket.setFooter("Ticket Closed");
-            consumerTicket.setTimestamp(new Date().toInstant());
-
-            event.replyEmbeds(embedBuilder.build()).queue();
-            Utils.sendPrivateMessage(ticket.getConsumer().getUser(), consumerTicket.build());
-
-            Main.getInstance().getTicketManager().closeTicket(ticket);
-
-            // TODO:
-
-        }else if (buttonID.equalsIgnoreCase("close_reason")){
-            TextInput respond = TextInput.create("ticket_close", "Message to Close ticket", TextInputStyle.PARAGRAPH)
-                    .setMinLength(2)
+            TextInput respond = TextInput.create("ticket_response", "Ticket Closure Reason", TextInputStyle.PARAGRAPH)
+                    .setMinLength(0)
                     .setMaxLength(1024)
-                    .setPlaceholder("message here..")
+                    .setPlaceholder("reason here..")
                     .setRequired(true)
                     .build();
 
-            Modal modal = Modal.create("ticket_close_m", "Respond to member")
+            Modal modal = Modal.create("response", "Close Ticket")
                     .addActionRows(ActionRow.of(respond))
                     .build();
 
@@ -115,7 +87,7 @@ public class TicketCommand implements SlashCommand {
         try {
             if (event.getModalId().equalsIgnoreCase("response")) {
                 String buttonID = event.getValues().stream().findAny().get().getId();
-                BotLogger.log(buttonID);
+                //BotLogger.log(buttonID);
                 if (buttonID.equalsIgnoreCase("response_input")) {
                     EmbedBuilder embedBuilder = new EmbedBuilder();
 
@@ -135,7 +107,7 @@ public class TicketCommand implements SlashCommand {
                     // TODO: send ticket
                     Main.getInstance().getTicketManager().send(ticket, event.getValue("response_input").getAsString());
                     event.replyEmbeds(embedBuilder.build()).queue();
-                } else if (event.getModalId().equalsIgnoreCase("ticket_close_m")) {
+                } else if (buttonID.equalsIgnoreCase("ticket_response")) {
                     EmbedBuilder embedBuilder = new EmbedBuilder();
 
                     Ticket ticket = Main.getInstance().getTicketManager().getTicketByResponder(event.getUser().getId());
@@ -143,17 +115,36 @@ public class TicketCommand implements SlashCommand {
                         event.reply("Something that shouldn't go wrong went wrong. Contact developer if problem persists!").setEphemeral(true).queue();
                         return;
                     }
+                    String reason = event.getValue("ticket_response").getAsString();
 
-                    embedBuilder.setAuthor("Support Team", "", event.getJDA().getSelfUser().getAvatarUrl());
-                    embedBuilder.addField(ticket.getType().name() + " Closure", ticket.getConsumer().getAsMention(), true);
-                    embedBuilder.addField("Response", event.getValue("response_input").getAsString(), false);
-                    embedBuilder.setColor(new Color(200, 0, 0));
-                    embedBuilder.setFooter("Ticket ID: " + ticket.getTicketID());
+                    embedBuilder.setAuthor(ticket.getConsumer().getUser().getAsTag(), null, ticket.getConsumer().getAvatarUrl());
+                    embedBuilder.setTitle("Ticket Closed.");
+                    if (reason == null || reason.length() == 0){
+                        embedBuilder.setDescription("This ticket has been closed with no reason.");
+                    }else{
+                        embedBuilder.setDescription("This ticket has been closed with the reason of: " + reason);
+                    }
+
+                    embedBuilder.addField("Closed By", event.getMember().getUser().getAsTag(), false);
+                    embedBuilder.setFooter("Closed");
                     embedBuilder.setTimestamp(new Date().toInstant());
+                    embedBuilder.setColor(new Color(0, 0, 0));
 
-                    // TODO: send it
+                    ticket.setResponder(event.getUser().getId());
+                    if (ticket.getM() != null)
+                        ticket.getM().addReaction("✅").queue();
+
+                    EmbedBuilder consumerTicket = new EmbedBuilder();
+                    consumerTicket.setAuthor("Support Team", null, event.getJDA().getSelfUser().getAvatarUrl());
+                    consumerTicket.setColor(new Color(0, 0, 0));
+                    consumerTicket.setDescription("This ticket has now been closed. If you send another message, it will create a new ticket.");
+                    consumerTicket.setFooter("Ticket Closed");
+                    consumerTicket.setTimestamp(new Date().toInstant());
 
                     event.replyEmbeds(embedBuilder.build()).queue();
+                    Utils.sendPrivateMessage(ticket.getConsumer().getUser(), consumerTicket.build());
+
+                    Main.getInstance().getTicketManager().closeTicket(ticket);
                 }
             }
         }catch (Exception ex){

@@ -1,12 +1,9 @@
-package me.karam.modules;
+package me.karam.modules.modmail;
 
 import me.karam.Main;
 import me.karam.config.Config;
 import me.karam.modules.modmail.Ticket;
-import me.karam.utils.BotLogger;
-import me.karam.utils.Settings;
-import me.karam.utils.Severity;
-import me.karam.utils.Utils;
+import me.karam.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -16,6 +13,7 @@ import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 
 import java.awt.*;
+import java.awt.Color;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
@@ -35,12 +33,15 @@ public class TicketManager {
     }
 
     public void loadExistingTickets(){
-        BotLogger.log(config.getRawData("openedTickets"));
-        BotLogger.log(config.getRawData("closedTickets"));
+        //BotLogger.log(config.getRawData("openedTickets"));
+        //BotLogger.log(config.getRawData("closedTickets"));
     }
 
     public void saveTickets(){
-        config.insert("openedTickets", openTickets);
+        //HashMap
+
+        // Bucket
+        config.insert("openedTickets", SavableObject.toSavableTickets(openTickets));
         config.insert("closedTickets", closedTickets);
         config.save();
     }
@@ -65,7 +66,6 @@ public class TicketManager {
         channel.sendMessageEmbeds(builder.build())
                 .setActionRows(ActionRow.of(
                         Button.danger("close_no_reason", "🔒 Close"),
-                        Button.danger("close_reason", "\uD83D\uDD0F Close with reason"),
                         Button.primary("respond", "🖋️ Respond")
                 )).queue();
 
@@ -77,6 +77,7 @@ public class TicketManager {
 
         embedBuilder.setAuthor("Support Team", null, Main.jda.getSelfUser().getAvatarUrl());
         embedBuilder.setDescription(message);
+        embedBuilder.addField("Responder", Main.jda.getUserById(ticket.getResponder()).getAsTag(), fa);
         embedBuilder.setFooter("Response");
         embedBuilder.setTimestamp(new Date().toInstant());
         embedBuilder.setColor(new Color(200, 200, 0));
@@ -100,7 +101,6 @@ public class TicketManager {
         TextChannel channel = ticket.getConsumer().getJDA().getGuildById(Settings.GUILD_ID).getTextChannelById(Settings.TICKET_LOG_CHANNEL);
         channel.sendMessageEmbeds(embedBuilder.build()).setActionRows(ActionRow.of(
                 Button.danger("close_no_reason", "🔒 Close"),
-                Button.danger("close_reason", "\uD83D\uDD0F Close with reason"),
                 Button.primary("respond", "🖋️ Respond")
             )).queue();
     }
@@ -118,6 +118,7 @@ public class TicketManager {
     }
 
     public Ticket getTicketByUUID(UUID ticketID){
+
         return openTickets.values().stream().filter(ticket -> ticket.getTicketID().equals(ticketID)).findFirst().orElse(null);
     }
 

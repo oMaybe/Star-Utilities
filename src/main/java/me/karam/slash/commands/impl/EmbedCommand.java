@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.utils.MarkdownUtil;
 
@@ -55,14 +56,14 @@ public class EmbedCommand implements SlashCommand {
                     "• If you need any kind of support that isn't covered above, use the Other Support button\n" +
                             "• Please be sure to explain what kind of support you need in detail", true);
 
-            event.replyEmbeds(builder.build()).addActionRow(
+            event.deferReply(true).queue();
+            event.getTextChannel().sendMessageEmbeds(builder.build()).setActionRows(ActionRow.of(
                     Button.link("https://forms.gle/SFsrCpM5YqmQRN5i9", "\uD83D\uDD28 Appeal Ban"),
                     Button.primary("apply", "\uD83C\uDF88 Apply for Media"),
-                    Button.primary("nitro", "\uD83D\uDC8E Claim Nitro Perks")
-            ).addActionRow(
+                    Button.primary("nitro", "\uD83D\uDC8E Claim Nitro Perks"),
                     Button.danger("report", "⚠️ Report User"),
                     Button.success("question", "❓ Other Questions or Concerns")
-            ).queue();
+                    )).queue();
         }else{
             event.reply("I'm sorry but the only choices you have is 'support'.").setEphemeral(true).queue();
         }

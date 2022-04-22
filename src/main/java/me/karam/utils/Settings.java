@@ -13,7 +13,7 @@ public class Settings {
 
     public static Config config;
 
-    public static String GUILD_ID = "954271232067530782"; // TODO: this is test server change to main server later!
+    public static String GUILD_ID; // TODO: this is test server change to main server later!
     public static String TOKEN;
     public static String TICKET_LOG_CHANNEL;
 

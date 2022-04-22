@@ -41,9 +41,11 @@ public class CommandManager extends ListenerAdapter {
     public CommandManager(){
         commandMap = new ConcurrentHashMap<>();
 
-        commandMap.put("dm", new DMCommand());
+        commandMap.put("giveaway", new DMCommand());
         commandMap.put("settings", new SettingsCommand());
         commandMap.put("embeds", new EmbedCommand());
+
+        // Non command
         commandMap.put("tickets", new TicketCommand());
 
         //register(true, "{\"name\":\"tickets\",\"description\":\"main tickets command\",\"options\":[{\"type\":1,\"name\":\"respond\",\"description\":\"respond to tickets\",\"options\":[{\"type\":3,\"name\":\"ticket_id\",\"description\":\"id of \",\"required\":true},{\"type\":3,\"name\":\"message\",\"description\":\"the message you want to send\",\"required\":true}]}]}");
@@ -65,6 +67,13 @@ public class CommandManager extends ListenerAdapter {
                         .addChoice("ticket_channel", "ticket_channel").setRequired(true)
                         .addChoice("guild_id", "guild_id").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "value", "the new value").setRequired(true)));
+
+        commands.addCommands(Commands.slash("giveaway", "giveaway admin command")
+                .addOptions(new OptionData(OptionType.STRING, "sub_command", "create a new giveaway").setRequired(true)
+                        .addChoice("create", "create").setRequired(true))
+                .addOptions(new OptionData(OptionType.STRING, "prize", "the prize of the giveaway").setRequired(true).setAutoComplete(true))
+                .addOptions(new OptionData(OptionType.STRING, "duration", "the duration of the giveaway. (i.e. 3d, 5m, 2h)").setRequired(true))
+                .addOptions(new OptionData(OptionType.INTEGER, "winners", "amount of winners").setRequired(true)));
 
         commands.queue();
     }

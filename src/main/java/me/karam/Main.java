@@ -3,7 +3,7 @@ package me.karam;
 import lombok.Getter;
 import me.karam.listener.MainListener;
 import me.karam.listener.MessageListener;
-import me.karam.modules.TicketManager;
+import me.karam.modules.modmail.TicketManager;
 import me.karam.profile.ProfileManager;
 import me.karam.slash.commands.CommandManager;
 import me.karam.utils.BotLogger;
@@ -16,9 +16,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
-import javax.print.attribute.SetOfIntegerSyntax;
 import javax.security.auth.login.LoginException;
-import java.awt.*;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.Timer;
@@ -56,7 +54,7 @@ public class Main {
 
         log(Severity.INFO, "Loading main discord bot..");
         //DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(Settings.TOKEN);
-        builder = JDABuilder.createDefault(Settings.TOKEN);
+        builder = JDABuilder.createDefault(""); // TODO: CHANGE BEFORE RELEASE
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.setMemberCachePolicy(MemberCachePolicy.ALL);
         builder.enableIntents(GatewayIntent.GUILD_PRESENCES);
@@ -111,11 +109,10 @@ public class Main {
             int i = 0;
             @Override
             public void run() {
-                if (i > messages.length)
-                    i = 0;
+                //if (i++ > messages.length)
+                //    i = 0;
 
-                jda.getPresence().setActivity(Activity.watching(messages[i]));
-                i++;
+                jda.getPresence().setActivity(Activity.watching(messages[0]));
                 //cancel();
                 //jda.getGuildById("954271232067530782").getRoleById("955311110649675887").getManager().setColor(new Color(0, random(50, 150), random(50, 150))).queue();
             }
