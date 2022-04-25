@@ -70,7 +70,7 @@ public class TicketCommand implements SlashCommand {
             TextInput respond = TextInput.create("ticket_response", "Ticket Closure Reason", TextInputStyle.PARAGRAPH)
                     .setMinLength(0)
                     .setMaxLength(1024)
-                    .setPlaceholder("reason here..")
+                    .setPlaceholder("reason here. (enter # to close without a reason)")
                     .setRequired(true)
                     .build();
 
@@ -119,7 +119,7 @@ public class TicketCommand implements SlashCommand {
 
                     embedBuilder.setAuthor(ticket.getConsumer().getUser().getAsTag(), null, ticket.getConsumer().getAvatarUrl());
                     embedBuilder.setTitle("Ticket Closed.");
-                    if (reason == null || reason.length() == 0){
+                    if (reason == null || reason.charAt(0) == '#'){
                         embedBuilder.setDescription("This ticket has been closed with no reason.");
                     }else{
                         embedBuilder.setDescription("This ticket has been closed with the reason of: " + reason);

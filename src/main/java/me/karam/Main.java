@@ -3,6 +3,7 @@ package me.karam;
 import lombok.Getter;
 import me.karam.listener.MainListener;
 import me.karam.listener.MessageListener;
+import me.karam.modules.giveaway.GiveawayManager;
 import me.karam.modules.modmail.TicketManager;
 import me.karam.profile.ProfileManager;
 import me.karam.slash.commands.CommandManager;
@@ -41,6 +42,8 @@ public class Main {
     private TicketManager ticketManager;
     @Getter
     private ProfileManager profileManager;
+    @Getter
+    private GiveawayManager giveawayManager;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(0);
 
@@ -54,7 +57,7 @@ public class Main {
 
         log(Severity.INFO, "Loading main discord bot..");
         //DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(Settings.TOKEN);
-        builder = JDABuilder.createDefault(""); // TODO: CHANGE BEFORE RELEASE
+        builder = JDABuilder.createDefault("OTYzNjc4NTAxNDk4Njc5Mzc3.YlZliw.c6jrxpu1e0hSX_8kkdODWHaeoKY"); // TODO: CHANGE BEFORE RELEASE
         builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
         builder.setMemberCachePolicy(MemberCachePolicy.ALL);
         builder.enableIntents(GatewayIntent.GUILD_PRESENCES);
@@ -77,7 +80,10 @@ public class Main {
         ticketManager = new TicketManager();
         log(Severity.INFO, "Loading profiles...");
         profileManager = new ProfileManager();
+        log("loading giveaways...");
+        giveawayManager = new GiveawayManager();
         log("Loading galaxy..");
+        //TODO: anti raid
         startGalaxy();
 
         consoleListener();
@@ -102,7 +108,7 @@ public class Main {
     }
 
     private void startGalaxy(){
-        String[] messages = {"Star Galaxy", "You", jda.getGuildById(895687295284437013L).getMemberCount() + " Members"};
+        String[] messages = {"Star Galaxy", "You", jda.getGuildById(Settings.GUILD_ID).getMemberCount() + " Members"};
 
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {

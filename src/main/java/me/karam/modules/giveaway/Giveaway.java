@@ -2,14 +2,19 @@ package me.karam.modules.giveaway;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.SneakyThrows;
+import me.karam.utils.BotLogger;
+import me.karam.utils.TimeUtil;
 import net.dv8tion.jda.api.entities.TextChannel;
 
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 @Getter
 @Setter
-public class Giveaway {
+public class Giveaway{
 
     private UUID id;
     private String prize;
@@ -23,6 +28,7 @@ public class Giveaway {
     private List<String> winners;
 
     private TextChannel channel;
+    private TimerTask timer;
 
     public Giveaway(UUID id, String prize, long expiry, int allowedWinners, String hosterID) {
         this.id = id;
@@ -30,5 +36,30 @@ public class Giveaway {
         this.expiry = expiry;
         this.allowedWinners = allowedWinners;
         this.hosterID = hosterID;
+    }
+
+    public String getDuration(){
+        return TimeUtil.formatTimeMillis(expiry);
+    }
+
+    public void run() {
+        Timer timer = new Timer("giveaway_" + id);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @SneakyThrows
+            @Override
+            public void run() {
+                if (passed()){
+                    channel.sendMessage("yes").queue();
+                }else{
+                    channel.sendMessage("not yet").queue();
+                }
+            }
+        }, 100, 1000);
+    }
+
+    public boolean passed(){
+        BotLogger.log("EX: " + expiry + " SYS:" + System.currentTimeMillis());
+        long diff = (expiry + System.currentTimeMillis()) - System.currentTimeMillis();
+        return !(diff > 0L);
     }
 }

@@ -77,7 +77,6 @@ public class TicketManager {
 
         embedBuilder.setAuthor("Support Team", null, Main.jda.getSelfUser().getAvatarUrl());
         embedBuilder.setDescription(message);
-        embedBuilder.addField("Responder", Main.jda.getUserById(ticket.getResponder()).getAsTag(), fa);
         embedBuilder.setFooter("Response");
         embedBuilder.setTimestamp(new Date().toInstant());
         embedBuilder.setColor(new Color(200, 200, 0));
@@ -94,6 +93,7 @@ public class TicketManager {
 
         embedBuilder.setAuthor(ticket.getConsumer().getUser().getAsTag(), null, ticket.getConsumer().getUser().getAvatarUrl());
         embedBuilder.addField("Response", message, false);
+        embedBuilder.addField("Responder", Main.jda.getUserById(ticket.getResponder()).getAsTag(), false);
         embedBuilder.setColor(new Color(50, 200, 0));
         embedBuilder.setFooter("Ticket ID: " + ticket.getTicketID());
         embedBuilder.setTimestamp(new Date().toInstant());

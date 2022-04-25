@@ -2,10 +2,7 @@ package me.karam.slash.commands;
 
 import com.google.gson.Gson;
 import me.karam.Main;
-import me.karam.slash.commands.impl.DMCommand;
-import me.karam.slash.commands.impl.EmbedCommand;
-import me.karam.slash.commands.impl.SettingsCommand;
-import me.karam.slash.commands.impl.TicketCommand;
+import me.karam.slash.commands.impl.*;
 import me.karam.utils.BotLogger;
 import me.karam.utils.Color;
 import me.karam.utils.Settings;
@@ -41,7 +38,7 @@ public class CommandManager extends ListenerAdapter {
     public CommandManager(){
         commandMap = new ConcurrentHashMap<>();
 
-        commandMap.put("giveaway", new DMCommand());
+        commandMap.put("giveaway", new GiveawayCommand());
         commandMap.put("settings", new SettingsCommand());
         commandMap.put("embeds", new EmbedCommand());
 
@@ -73,7 +70,8 @@ public class CommandManager extends ListenerAdapter {
                         .addChoice("create", "create").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "prize", "the prize of the giveaway").setRequired(true).setAutoComplete(true))
                 .addOptions(new OptionData(OptionType.STRING, "duration", "the duration of the giveaway. (i.e. 3d, 5m, 2h)").setRequired(true))
-                .addOptions(new OptionData(OptionType.INTEGER, "winners", "amount of winners").setRequired(true)));
+                .addOptions(new OptionData(OptionType.INTEGER, "winners", "amount of winners").setRequired(true))
+                .addOptions(new OptionData(OptionType.STRING, "requirements", "requirements to enter giveaway").setRequired(false)));
 
         commands.queue();
     }

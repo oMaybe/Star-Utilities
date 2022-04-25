@@ -3,6 +3,7 @@ package me.karam.listener;
 import me.karam.Main;
 import me.karam.modules.modmail.Ticket;
 import me.karam.modules.modmail.TicketType;
+import me.karam.utils.BotLogger;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.MessageChannel;
@@ -26,11 +27,12 @@ public class MessageListener extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        if (event.getAuthor().isBot()) return;
-
         if (event.isFromGuild()){
-
+            if (event.getMessage().getEmbeds() != null){
+                //BotLogger.log(event.getMessage().getEmbeds());
+            }
         }else {
+            if (event.getAuthor().isBot()) return;
             if (Main.getInstance().getTicketManager().hasOpenTicket(event.getAuthor().getId())) {
                 Ticket ticket = Main.getInstance().getTicketManager().getTicket(event.getAuthor());
                 if (ticket != null && !ticket.isClosed(ticket)) {

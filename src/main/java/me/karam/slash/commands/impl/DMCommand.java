@@ -3,6 +3,7 @@ package me.karam.slash.commands.impl;
 import me.karam.Main;
 import me.karam.slash.commands.SlashCommand;
 import me.karam.utils.BotLogger;
+import me.karam.utils.Settings;
 import me.karam.utils.Severity;
 import me.karam.utils.Utils;
 import net.dv8tion.jda.api.Permission;
@@ -27,12 +28,12 @@ public class DMCommand implements SlashCommand {
             return;
         }
 
-        if (Main.jda.getGuildById("954271232067530782").getMemberById(targetID) == null){
+        if (Main.jda.getGuildById(Settings.GUILD_ID).getMemberById(targetID) == null){
             event.reply("You cannot mention a role or a non existent member!").setEphemeral(true).queue();
             return;
         }
 
-        Member targetMember = Main.jda.getGuildById("954271232067530782").getMemberById(targetID);
+        Member targetMember = Main.jda.getGuildById(Settings.GUILD_ID).getMemberById(targetID);
 
         if (message == null || message.length() == 0){
             event.reply("You cannot send an empty message!").setEphemeral(true).queue();
