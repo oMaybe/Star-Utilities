@@ -38,7 +38,6 @@ public class CommandManager extends ListenerAdapter {
     public CommandManager(){
         commandMap = new ConcurrentHashMap<>();
 
-        commandMap.put("giveaway", new GiveawayCommand());
         commandMap.put("settings", new SettingsCommand());
         commandMap.put("embeds", new EmbedCommand());
 
@@ -64,14 +63,6 @@ public class CommandManager extends ListenerAdapter {
                         .addChoice("ticket_channel", "ticket_channel").setRequired(true)
                         .addChoice("guild_id", "guild_id").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "value", "the new value").setRequired(true)));
-
-        commands.addCommands(Commands.slash("giveaway", "giveaway admin command")
-                .addOptions(new OptionData(OptionType.STRING, "sub_command", "create a new giveaway").setRequired(true)
-                        .addChoice("create", "create").setRequired(true))
-                .addOptions(new OptionData(OptionType.STRING, "prize", "the prize of the giveaway").setRequired(true).setAutoComplete(true))
-                .addOptions(new OptionData(OptionType.STRING, "duration", "the duration of the giveaway. (i.e. 3d, 5m, 2h)").setRequired(true))
-                .addOptions(new OptionData(OptionType.INTEGER, "winners", "amount of winners").setRequired(true))
-                .addOptions(new OptionData(OptionType.STRING, "requirements", "requirements to enter giveaway").setRequired(false)));
 
         commands.queue();
     }

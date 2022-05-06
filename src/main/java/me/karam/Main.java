@@ -1,9 +1,9 @@
 package me.karam;
 
 import lombok.Getter;
+import me.karam.config.DataSource;
 import me.karam.listener.MainListener;
 import me.karam.listener.MessageListener;
-import me.karam.modules.giveaway.GiveawayManager;
 import me.karam.modules.modmail.TicketManager;
 import me.karam.profile.ProfileManager;
 import me.karam.slash.commands.CommandManager;
@@ -42,8 +42,6 @@ public class Main {
     private TicketManager ticketManager;
     @Getter
     private ProfileManager profileManager;
-    @Getter
-    private GiveawayManager giveawayManager;
 
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(0);
 
@@ -70,7 +68,7 @@ public class Main {
 
         log(Severity.INFO, "Loading database...");
         try {
-            //DataSource.getConnection();
+            DataSource.getConnection();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -80,8 +78,6 @@ public class Main {
         ticketManager = new TicketManager();
         log(Severity.INFO, "Loading profiles...");
         profileManager = new ProfileManager();
-        log("loading giveaways...");
-        giveawayManager = new GiveawayManager();
         log("Loading galaxy..");
         //TODO: anti raid
         startGalaxy();
