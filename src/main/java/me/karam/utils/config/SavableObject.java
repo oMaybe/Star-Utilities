@@ -1,9 +1,8 @@
-package me.karam.utils;
+package me.karam.utils.config;
 
 import me.karam.modules.modmail.Ticket;
 
 import java.util.HashMap;
-import java.util.Objects;
 import java.util.UUID;
 
 public class SavableObject {

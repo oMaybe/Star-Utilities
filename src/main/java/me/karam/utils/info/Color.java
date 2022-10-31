@@ -1,4 +1,4 @@
-package me.karam.utils;
+package me.karam.utils.info;
 
 public class Color {
 

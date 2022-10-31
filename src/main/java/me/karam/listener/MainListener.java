@@ -22,9 +22,4 @@ public class MainListener extends ListenerAdapter {
     public void onGuildMemberRemove(@NotNull GuildMemberRemoveEvent event) {
         Main.getInstance().getProfileManager().remove(event.getUser().getId());
     }
-
-    @Override
-    public void onGenericInteractionCreate(@NotNull GenericInteractionCreateEvent event) {
-
-    }
 }

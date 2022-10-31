@@ -16,7 +16,7 @@ public class ProfileManager {
 
     public ProfileManager(){
         profileHashMap = new HashMap<>();
-        Main.jda.getGuildById("954271232067530782").getMembers()
+        Main.jda.getGuildById(Settings.GUILD_ID).getMembers()
                 .stream()
                 .filter(member -> !member.getUser().isBot())
                 .forEach(member -> add(member.getUser()));

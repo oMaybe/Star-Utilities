@@ -1,4 +1,4 @@
-package me.karam.utils;
+package me.karam.utils.gear;
 
 import lombok.experimental.UtilityClass;
 
@@ -36,19 +36,27 @@ public class TimeUtil {
         }
 
         if (day != 0) {
-            time.append(day).append(day == 1 ? " day " : " days ");
+            if (years == 0) {
+                time.append(day).append(day == 1 ? " day " : " days ");
+            }
         }
 
         if (hours != 0) {
-            time.append(hours).append(hours == 1 ? " hour " : " hours ");
+            if (day == 0) {
+                time.append(hours).append(hours == 1 ? " hour " : " hours ");
+            }
         }
 
         if (minutes != 0) {
-            time.append(minutes).append(minutes == 1 ? " minute " : " minutes ");
+            if (hours == 0) {
+                time.append(minutes).append(minutes == 1 ? " minute " : " minutes ");
+            }
         }
 
         if (seconds != 0) {
-            time.append(seconds).append(seconds == 1 ? " second " : " seconds ");
+            if (minutes == 0) {
+                time.append(seconds).append(seconds == 1 ? " second " : " seconds ");
+            }
         }
 
         return time.toString().trim();
