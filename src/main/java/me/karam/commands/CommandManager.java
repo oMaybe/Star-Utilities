@@ -1,12 +1,16 @@
-package me.karam.slash.commands;
+package me.karam.commands;
 
-import com.google.gson.Gson;
 import me.karam.Main;
-import me.karam.slash.commands.impl.*;
-import me.karam.utils.BotLogger;
-import me.karam.utils.Color;
+import me.karam.commands.impl.SettingsCommand;
+import me.karam.commands.impl.EmbedCommand;
+import me.karam.commands.impl.GiveawayCommand;
+import me.karam.commands.impl.TicketCommand;
+import me.karam.utils.info.BotLogger;
+import me.karam.utils.info.Color;
 import me.karam.utils.Settings;
-import me.karam.utils.Severity;
+import me.karam.utils.info.Severity;
+import me.karam.utils.events.ButtonsEvent;
+import me.karam.utils.events.SelectionMenu;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
@@ -14,16 +18,13 @@ import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEve
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.requests.restaction.CommandListUpdateAction;
-import net.dv8tion.jda.api.utils.data.DataObject;
 import okhttp3.*;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
@@ -40,19 +41,14 @@ public class CommandManager extends ListenerAdapter {
 
         commandMap.put("settings", new SettingsCommand());
         commandMap.put("embeds", new EmbedCommand());
+        commandMap.put("giveaway", new GiveawayCommand());
 
-        // Non command
-        commandMap.put("tickets", new TicketCommand());
-
-        //register(true, "{\"name\":\"tickets\",\"description\":\"main tickets command\",\"options\":[{\"type\":1,\"name\":\"respond\",\"description\":\"respond to tickets\",\"options\":[{\"type\":3,\"name\":\"ticket_id\",\"description\":\"id of \",\"required\":true},{\"type\":3,\"name\":\"message\",\"description\":\"the message you want to send\",\"required\":true}]}]}");
-        //register(false, "{\"name\":\"embeds\",\"description\":\"sends pre made embed by bot\",\"options\":[{\"type\":3,\"name\":\"embed_name\",\"description\":\"name of embed you want to send\",\"required\":true}]}");
-        //register(false, "{\"name\":\"settings\",\"description\":\"changes configuration\",\"options\":[{\"type\":3,\"name\":\"setting\",\"description\":\"the setting you want to change\",\"required\":true},{\"type\":3,\"name\":\"value\",\"description\":\"new value of settings\",\"required\":true}]}");
-        // TODO: dm command
-        //register(false, "{\"name\":\"dm\",\"description\":\"private message a member from the bot\",\"options\":[{\"type\":9,\"name\":\"member\",\"description\":\"the member to send the message to\",\"required\":true},{\"type\":3,\"name\":\"message\",\"description\":\"the message to be sent tothe user\",\"required\":true}]}");
+        // Non-command
+        commandMap.put("ticket", new TicketCommand());
     }
 
     public void registerCommands(){
-        CommandListUpdateAction commands = Main.jda.getGuildById(Long.valueOf(Settings.GUILD_ID)).updateCommands();
+        CommandListUpdateAction commands = Main.jda.getGuildById(Long.parseLong(Settings.GUILD_ID)).updateCommands();
 
         commands.addCommands(Commands.slash("embeds", "send pre-made embeds by bot")
                 .addOptions(new OptionData(OptionType.STRING, "embed_type", "the embed you want to send")
@@ -61,12 +57,35 @@ public class CommandManager extends ListenerAdapter {
         commands.addCommands(Commands.slash("settings", "main settings command")
                 .addOptions(new OptionData(OptionType.STRING, "key", "the value you want to change")
                         .addChoice("ticket_channel", "ticket_channel").setRequired(true)
-                        .addChoice("guild_id", "guild_id").setRequired(true))
+                        .addChoice("guild_id", "guild_id").setRequired(true)
+                        .addChoice("ticket_category", "ticket_category_id").setRequired(true))
                 .addOptions(new OptionData(OptionType.STRING, "value", "the new value").setRequired(true)));
+
+        commands.addCommands(Commands.slash("ticket", "manages tickets")
+                .addSubcommands(new SubcommandData("close", "closes an existing ticket")
+                        .addOptions(new OptionData(OptionType.STRING, "reason", "reason for ticket closure (not required)")))
+                .addSubcommands(new SubcommandData("lock", "locks an open ticket from the user"))
+                .addSubcommands(new SubcommandData("claim", "Claims a ticket")));
+
+        commands.addCommands(Commands.slash("giveaway", "giveaway admin command")
+                        .addSubcommands(new SubcommandData("create", "creates a new giveaway")
+                .addOptions(new OptionData(OptionType.STRING, "prize", "the prize of the giveaway").setRequired(true))
+                .addOptions(new OptionData(OptionType.STRING, "duration", "the duration of the giveaway. (i.e. 3d, 30m, 3h)").setRequired(true))
+                .addOptions(new OptionData(OptionType.INTEGER, "winners", "amount of winners").setMinValue(1).setRequired(true))
+                .addOptions(new OptionData(OptionType.STRING, "requirements", "requirements to enter giveaway").setRequired(false))));
+                //.addOptions(new OptionData(OptionType.INTEGER, "max_e", "maximum amount of enteries").setRequired(false))));
+
+
+        commands.addCommands(
+                Commands.context(Command.Type.USER, "Ticket Blacklist"),
+                Commands.context(Command.Type.USER, "Ticket Whitelist"),
+                Commands.context(Command.Type.MESSAGE, "Giveaway Edit")
+        );
 
         commands.queue();
     }
 
+    @Deprecated
     public static void register(boolean printResponse, String firstJson, String... json){
         String[] jsons = Stream.concat(Arrays.stream(new String[] {firstJson}), Arrays.stream(json)).toArray(String[]::new);
 
@@ -95,28 +114,24 @@ public class CommandManager extends ListenerAdapter {
         SlashCommand command;
 
         if ((command = commandMap.get(commandName)) != null){
-            command.performCommand(event, event.getMember(), event.getTextChannel());
+            command.performCommand(event, event.getMember(), event.getChannel().asTextChannel());
         }
     }
 
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
-        for (SlashCommand command : commandMap.values()){
-            //command.executeButton(event);
-        }
-
         commandMap.values().stream().forEach(command -> {
             Class commandClass = command.getClass();
             Method[] methods = commandClass.getDeclaredMethods();
             for (int i = 0; i < methods.length; i++) {
                 Method method = methods[i];
-                if (method.getName().equalsIgnoreCase("onButton")){
+                if (method.isAnnotationPresent(ButtonsEvent.class)){
                     try {
-                        commandClass.getDeclaredMethod(method.getName(), new Class[] {ButtonInteractionEvent.class}).invoke(commandClass.newInstance(), event);
+                        commandClass.getDeclaredMethod(method.getName(), ButtonInteractionEvent.class).invoke(commandClass.newInstance(), event);
                         super.onButtonInteraction(event);
                     } catch (Exception e) {
                         BotLogger.log(Severity.HIGH, "Seems like a dangerous error was encountered. The stacktrace message was left with: " + Color.ANSI_YELLOW + e.getMessage() + Color.ANSI_WHITE);
-                        BotLogger.log(Severity.HIGH, "Seems like a dangerous error was encountered. The stacktrace message was left with: " + Color.ANSI_YELLOW + e.getStackTrace() + Color.ANSI_WHITE);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -132,12 +147,13 @@ public class CommandManager extends ListenerAdapter {
             Method[] methods = commandClass.getDeclaredMethods();
             for (int i = 0; i < methods.length; i++) {
                 Method method = methods[i];
-                if (method.getName().equalsIgnoreCase("onSelectMenu")){
+                if (method.isAnnotationPresent(SelectionMenu.class)){ //method.getName().equalsIgnoreCase("onSelectMenu")
                     try {
-                        commandClass.getDeclaredMethod(method.getName(), new Class[] {ButtonInteractionEvent.class}).invoke(commandClass.newInstance(), event);
+                        commandClass.getDeclaredMethod(method.getName(), SelectMenuInteractionEvent.class).invoke(commandClass.newInstance(), event);
                         super.onSelectMenuInteraction(event);
                     } catch (Exception e) {
                         BotLogger.log(Severity.HIGH, "Seems like a dangerous error was encountered. The stacktrace was left with: " + Color.ANSI_YELLOW + e.getMessage() + Color.ANSI_WHITE);
+                        e.printStackTrace();
                     }
                 }
             }
@@ -152,12 +168,13 @@ public class CommandManager extends ListenerAdapter {
             Method[] methods = commandClass.getDeclaredMethods();
             for (int i = 0; i < methods.length; i++) {
                 Method method = methods[i];
-                if (method.getName().equalsIgnoreCase("onModalInteraction")){
+                if (method.getName().equalsIgnoreCase("onModal")){
                     try {
                         commandClass.getDeclaredMethod(method.getName(), new Class[] {ModalInteractionEvent.class}).invoke(commandClass.newInstance(), event);
                         super.onModalInteraction(event);
                     } catch (Exception e) {
                         BotLogger.log(Severity.HIGH, "Seems like a dangerous error was encountered. The stacktrace was left with: " + Color.ANSI_YELLOW + e.getMessage() + Color.ANSI_WHITE);
+                        e.printStackTrace();
                     }
                 }
             }

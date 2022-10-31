@@ -1,9 +1,8 @@
 package me.karam.config;
 
-import me.karam.Main;
-import me.karam.utils.BotLogger;
-import me.karam.utils.Color;
-import me.karam.utils.Severity;
+import me.karam.utils.info.BotLogger;
+import me.karam.utils.info.Color;
+import me.karam.utils.info.Severity;
 
 import java.io.File;
 import java.sql.*;

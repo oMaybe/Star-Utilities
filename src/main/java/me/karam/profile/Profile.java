@@ -1,16 +1,17 @@
 package me.karam.profile;
 
-import me.karam.Main;
+import lombok.Getter;
+import lombok.Setter;
+import me.karam.modules.giveaway.Giveaway;
 import me.karam.modules.modmail.Ticket;
-import me.karam.utils.Severity;
 
-import java.io.File;
-import java.io.IOException;
-
+@Setter
+@Getter
 public class Profile {
 
     private String id;
     private Ticket openedTicket;
+    private String editing;
 
     public Profile(String id){
         this.id = id;
@@ -18,7 +19,6 @@ public class Profile {
     }
 
     public void loadData(){
-
         // load from database
     }
 }

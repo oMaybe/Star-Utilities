@@ -31,3 +31,6 @@ out/*
 pom.xml
 FileManipulator.java
 TokenManager.java
+token.icu
+database/*
+transcripts/*

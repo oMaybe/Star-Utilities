@@ -1,19 +1,13 @@
-package me.karam.slash.commands.impl;
+package me.karam.commands.impl;
 
 import me.karam.Main;
-import me.karam.slash.commands.SlashCommand;
-import me.karam.utils.BotLogger;
+import me.karam.commands.SlashCommand;
 import me.karam.utils.Settings;
-import me.karam.utils.Severity;
-import me.karam.utils.Utils;
+import me.karam.utils.gear.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.*;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.OptionMapping;
-
-import java.util.concurrent.TimeUnit;
 
 public class DMCommand implements SlashCommand {
 

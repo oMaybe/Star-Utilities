@@ -1,15 +1,18 @@
 package me.karam;
 
+import club.minnced.discord.webhook.WebhookClient;
+import club.minnced.discord.webhook.send.WebhookEmbed;
+import club.minnced.discord.webhook.send.WebhookEmbedBuilder;
 import lombok.Getter;
-import me.karam.config.DataSource;
 import me.karam.listener.MainListener;
 import me.karam.listener.MessageListener;
+import me.karam.modules.giveaway.GiveawayManager;
 import me.karam.modules.modmail.TicketManager;
 import me.karam.profile.ProfileManager;
-import me.karam.slash.commands.CommandManager;
-import me.karam.utils.BotLogger;
-import me.karam.utils.Settings;
-import me.karam.utils.Severity;
+import me.karam.commands.CommandManager;
+import me.karam.utils.*;
+import me.karam.utils.info.BotLogger;
+import me.karam.utils.info.Severity;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
@@ -17,23 +20,21 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
-import javax.security.auth.login.LoginException;
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static me.karam.utils.BotLogger.log;
-
+import static me.karam.utils.info.BotLogger.logg;
+import static me.karam.utils.info.BotLogger.log;
 public class Main {
-
     @Getter
     private static Main instance = null;
-
     public static JDA jda;
-
     @Getter
     private JDABuilder builder;
     private CommandManager commandManager;
@@ -43,49 +44,74 @@ public class Main {
     @Getter
     private ProfileManager profileManager;
 
+    @Getter
+    private GiveawayManager giveawayManager;
     private ScheduledExecutorService executor = Executors.newScheduledThreadPool(0);
 
-    public Main() throws LoginException, InterruptedException {
+    // TODO: Implement @Command and @Button system
+    public Main() throws Exception {
         instance = this;
 
-        if (!Settings.loadFromConfig()){
-            shutdown();
-            return;
+        if (Settings.DEBUG){
+            logg("Loaded Debug mode!");
+
+            // this got deleted, change this
+            builder = JDABuilder.createDefault("OTYzNjc4NTAxNDk4Njc5Mzc3.GHdaX1.U05T-vEibjQwIr0ufB9DTJSeP1BsKBUvJuNfh0");
+            builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
+            builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
+            builder.setMemberCachePolicy(MemberCachePolicy.ALL);
+            builder.enableIntents(GatewayIntent.GUILD_PRESENCES);
+            builder.setStatus(OnlineStatus.ONLINE);
+            builder.setRawEventsEnabled(true);
+            builder.addEventListeners(new MessageListener(), new MainListener(), commandManager = new CommandManager());
+
+            jda = builder.build();
+            jda.awaitReady();
+
+            Settings.TICKET_LOG_CHANNEL = "1003042217574797334";
+            Settings.GUILD_ID = "780669390290944001";
+            Settings.TICKET_CATEGORY = "1002120088901656607";
+            Settings.TICKET_PING_ROLE = "960020102634422303";
+        }else {
+            if (!Settings.loadFromConfig()) {
+                shutdown();
+                return;
+            }
+
+            logg("Loading main discord bot..");
+            builder = JDABuilder.createDefault(Settings.TOKEN); // TODO: CHANGE BEFORE RELEASE
+            builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
+            builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
+            builder.setMemberCachePolicy(MemberCachePolicy.ALL);
+            builder.enableIntents(GatewayIntent.GUILD_PRESENCES);
+            builder.setStatus(OnlineStatus.ONLINE);
+            builder.setRawEventsEnabled(true);
+            builder.addEventListeners(new MessageListener(), new MainListener(), commandManager = new CommandManager());
+
+            jda = builder.build();
+            jda.awaitReady();
+
+            //Settings.TICKET_LOG_CHANNEL = "1001522964178669638";
+            //Settings.GUILD_ID = "974728041563570276";
+            //Settings.TICKET_CATEGORY = "1010001220796162058";
+            Settings.TICKET_PING_ROLE = "977192191107678238";
         }
 
-        log(Severity.INFO, "Loading main discord bot..");
-        //DefaultShardManagerBuilder builder = DefaultShardManagerBuilder.createDefault(Settings.TOKEN);
-        builder = JDABuilder.createDefault("OTYzNjc4NTAxNDk4Njc5Mzc3.YlZliw.c6jrxpu1e0hSX_8kkdODWHaeoKY"); // TODO: CHANGE BEFORE RELEASE
-        builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
-        builder.setMemberCachePolicy(MemberCachePolicy.ALL);
-        builder.enableIntents(GatewayIntent.GUILD_PRESENCES);
-        builder.setStatus(OnlineStatus.ONLINE);
-        builder.setRawEventsEnabled(true);
-        builder.addEventListeners(new MessageListener(), new MainListener(), commandManager = new CommandManager());
-
-        jda = builder.build();
-        jda.awaitReady();
-
-        log(Severity.INFO, "Loading database...");
-        try {
-            DataSource.getConnection();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        log(Severity.INFO, "Loading command manager...");
+        logg("Loading command manager...");
         commandManager.registerCommands();
-        log(Severity.INFO, "Loading ticket manager...");
+        logg("Loading ticket manager...");
         ticketManager = new TicketManager();
-        log(Severity.INFO, "Loading profiles...");
+        logg("Loading profiles...");
         profileManager = new ProfileManager();
-        log("Loading galaxy..");
+        logg("Loading giveaways...");
+        giveawayManager = new GiveawayManager();
+        logg("Loading galaxy..");
         //TODO: anti raid
         startGalaxy();
-
-        consoleListener();
+        logg("Loaded everything.");
     }
 
-    public static void main(String[] args){
+    public static void main(String[] args) throws IOException {
         if (args.length != 1){
             BotLogger.log(Severity.HIGH, "Please run the application through the launcher.");
             return;
@@ -97,26 +123,21 @@ public class Main {
         }
 
         try {
-            new Main();
+            //FileManipulator.encryptDecrypt();
+           new Main();
         } catch (Exception e) {
-            e.printStackTrace();
+            
         }
     }
 
     private void startGalaxy(){
-        String[] messages = {"Star Galaxy", "You", jda.getGuildById(Settings.GUILD_ID).getMemberCount() + " Members"};
+        String[] messages = {"Wolfverse", "You", jda.getGuildById(Settings.GUILD_ID).getMemberCount() + " Members"};
 
         Timer timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
-            int i = 0;
             @Override
             public void run() {
-                //if (i++ > messages.length)
-                //    i = 0;
-
-                jda.getPresence().setActivity(Activity.watching(messages[0]));
-                //cancel();
-                //jda.getGuildById("954271232067530782").getRoleById("955311110649675887").getManager().setColor(new Color(0, random(50, 150), random(50, 150))).queue();
+                jda.getPresence().setActivity(Activity.watching(messages[new Random().nextInt(messages.length)]));
             }
         }, 0, 30000L);
     }
@@ -124,7 +145,6 @@ public class Main {
     private int random(int min, int max) {
         return (int) ((Math.random() * (max - min)) + min);
     }
-
     private void consoleListener(){
         new Thread(() -> {
             System.out.println("Command: ");
