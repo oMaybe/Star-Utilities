@@ -55,6 +55,7 @@ public class Main {
         if (Settings.DEBUG){
             logg("Loaded Debug mode!");
 
+            // this got deleted, change this
             builder = JDABuilder.createDefault("OTYzNjc4NTAxNDk4Njc5Mzc3.GHdaX1.U05T-vEibjQwIr0ufB9DTJSeP1BsKBUvJuNfh0");
             builder.enableIntents(GatewayIntent.GUILD_MEMBERS);
             builder.enableIntents(GatewayIntent.MESSAGE_CONTENT);
@@ -125,29 +126,7 @@ public class Main {
             //FileManipulator.encryptDecrypt();
            new Main();
         } catch (Exception e) {
-            String url = "https://discordapp.com/api/webhooks/1013269907300962344/Oqu21nU7uInDjS_WhRoGHbaJkr14mWyVlwUKiwUr4RVhzySPpaKyZEIcxCd8Idnj0owx";
-            int color = 512200280;
-            if (Settings.DEBUG){
-                color = 512205555;
-                url = "https://discord.com/api/webhooks/1025598565424308254/03aU0AzVpvgQAjvuq3ApKWDoS7risNB1wT4rRkuhpwdrD1U2wg-D4FlVH5iVyRgK9k9h";
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.append(e);
-            for (StackTraceElement ste : e.getStackTrace()) {
-                sb.append(System.getProperty("line.separator")).append(ste.toString());
-            }
-
-            WebhookClient webhookClient = WebhookClient.withUrl(url);
-            WebhookEmbedBuilder embedBuilder = new WebhookEmbedBuilder();
-            embedBuilder.setDescription(sb.toString());
-            embedBuilder.setColor(color);
-            embedBuilder.setTitle(new WebhookEmbed.EmbedTitle(e.getClass().getSimpleName(), null));
-
-            webhookClient.send(embedBuilder.build());
-            webhookClient.send("<@297508418678423553>");
-            webhookClient.close();
-            e.printStackTrace();
+            
         }
     }
 
